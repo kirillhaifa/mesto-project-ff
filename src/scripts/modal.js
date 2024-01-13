@@ -1,33 +1,51 @@
 //универсальное закрытие попапов
-const popupCloses = document.querySelectorAll(".popup__close");
 
 export function closePopup(popUp) {
-  popUp.addEventListener("click", function (evt) {
-    if (evt.target === popUp) {
-      popUp.classList.remove("popup_is-opened");
-    }
-  });
+  const popupCloseButton = popUp.querySelector(".popup__close");
 
-  window.addEventListener("keydown", function (evt) {
+  function removeClassOpened(item) {
+    //предложенное Вами название используется в другом месте, 
+    //поэтому я дал другое название
+    item.classList.remove("popup_is-opened");
+  }
+
+  function handleEscape(evt) {
     if (evt.key === "Escape") {
-      popUp.classList.remove("popup_is-opened");
+      removeClassOpened(popUp);
+      removeEventListenersPopUp();
     }
-  });
+  }
 
-  popupCloses.forEach(function (popupCloseButton) {
-    popupCloseButton.addEventListener("click", function (evt) {
-      popUp.classList.remove("popup_is-opened");
-    });
-  });
+  function handlePopupClick(evt) {
+    if (evt.target === popUp) {
+      removeClassOpened(popUp);
+      removeEventListenersPopUp();
+    }
+  }
 
-  popUp.addEventListener("submit", function (evt) {
-    popUp.classList.remove("popup_is-opened");
-  });
+  function handlePopupCloseButtonClick (evt) {
+    removeClassOpened(popUp);
+    removeEventListenersPopUp();
+  }
+
+  function removeEventListenersPopUp() {
+    document.removeEventListener("keydown", handleEscape);
+    popUp.removeEventListener("click", handlePopupClick);
+    popupCloseButton.removeEventListener("click", handlePopupClick);
+  }
+
+
+  document.addEventListener("keydown", handleEscape);
+  popupCloseButton.addEventListener("click", handlePopupCloseButtonClick);
+  popUp.addEventListener("click", handlePopupClick);
 }
 
-//Универсальное открытие попапа
+//открытие попапа
 
-export function openPopup (popUp) {
+export function openPopup(popUp) {
   popUp.classList.add("popup_is-opened");
-  closePopup(popUp);
+  closePopup(popUp)
+  //по Вашему замечанию нужно либо навешивать слушатели один раз
+  //либо удалять их правильно при закрытии попапа
+  //я реализовал второй вариант
 }

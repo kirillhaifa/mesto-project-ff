@@ -1,56 +1,59 @@
-//создание карточки
-
-import { openPopup } from "./modal";
+import { closePopup, openPopup } from "./modal";
 
 const cardTemplate = document.querySelector("#card-template").content;
+const popupTypeImage = document.querySelector(".popup_type_image");
+const popupImage = document.querySelector(".popup__image");
+const popupCaption = document.querySelector(".popup__caption");
 
-export function addCard(initialCards, del, likeCard, openCardImage) {
-  let cardElement = cardTemplate.querySelector(".card").cloneNode(true);
-
-  cardElement.querySelector(".card__image").src = initialCards.link;
-  cardElement.querySelector(".card__title").textContent = initialCards.name;
-
+export function addCard(item, handleDeleteCard, handleOpenCardImage, handleLikeCard) {
+  const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
+  const cardImage = cardElement.querySelector(".card__image");
+  const cardName = cardElement.querySelector(".card__title");
   const cardDeleteButton = cardElement.querySelector(".card__delete-button");
+  const cardLikeButton = cardElement.querySelector(".card__like-button");
+
+  cardImage.src = item.link;
+  cardImage.alt = item.name; 
+  cardName.textContent = item.name;
 
   //удаление карточки
-
   cardDeleteButton.addEventListener("click", function () {
-    del(cardElement);
+    handleDeleteCard(cardElement);
   });
 
   //открытие попапа картинки
-
-  const popupTypeImage = document.querySelector(".popup_type_image");
-  const popupImage = document.querySelector(".popup__image");
-  const popupCaption = document.querySelector(".popup__caption");
-  const cardImage = cardElement.querySelector(".card__image");
-  const cardName = cardElement.querySelector(".card__title");
-
-  function openCardImage (evt) {
-    popupImage.setAttribute("src", cardImage.src);
-    popupCaption.textContent = cardName.textContent;
-    openPopup(popupTypeImage);
+  function handleOpenCardImage() {
+    openCardImage(item.name, item.link);
   }
 
-  cardImage.addEventListener("click", openCardImage);
+  cardImage.addEventListener("click", handleOpenCardImage); 
+  //если правильно понимаю, стрелочная функция для этого не обязательна?
 
   //лайк в карточке
-
-  const cardLikeButton = cardElement.querySelector(".card__like-button");
-
-  function likeCard (evt) {
-    cardLikeButton.classList.toggle("card__like-button_is-active");
+  function handleLikeCard() {
+    likeCard(cardLikeButton);
   }
 
-  cardLikeButton.addEventListener('click', likeCard)
+  cardLikeButton.addEventListener("click", handleLikeCard);
 
   return cardElement;
 }
 
 //удаление карточки
-
 export function deleteCard(cardElement) {
   cardElement.remove();
 }
 
+// открытие попапа картинки
+export function openCardImage(cardName, cardLink) {
+  popupImage.setAttribute("src", cardLink);
+  popupImage.setAttribute("alt", cardName);
+  popupCaption.textContent = cardName;
+  openPopup(popupTypeImage);
+}
+
+// лайк в карточке
+export function likeCard(cardLikeButton) {
+  cardLikeButton.classList.toggle("card__like-button_is-active");
+}
 
