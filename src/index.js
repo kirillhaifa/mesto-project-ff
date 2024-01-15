@@ -66,7 +66,7 @@ function handleEditProfileForm(evt) {
   profileTitle.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
 
-  popupTypeEdit.classList.remove("popup_is-opened");
+  closePopup(popupTypeEdit)
 }
 
 typeEditForm.addEventListener("submit", handleEditProfileForm);
@@ -84,7 +84,8 @@ function addNewCard(evt) {
   placesList.prepend(
     addCard(newCardObject, deleteCard, openCardImage, likeCard)
   );
-  popupTypeNewCard.classList.remove("popup_is-opened");
+
+  closePopup(popupTypeNewCard)
   newPlaceForm.reset();
 }
 
