@@ -22,6 +22,7 @@ const popupInputTypeCardName = popupTypeNewCard.querySelector(
 const popupInputTypeUrl = popupTypeNewCard.querySelector(
   ".popup__input_type_url"
 );
+const popups = document.querySelectorAll(".popup");
 
 // создание карточек из массива и их удаление
 
@@ -30,6 +31,19 @@ initialCards.forEach(function (initialCard) {
 });
 
 //попапы
+//слушатели закрытия модальных окон при клике по крестику и заднему плану
+
+popups.forEach((popup) => {
+  popup.addEventListener("mousedown", (evt) => {
+    if (evt.target === popup) {
+      closePopup(popup);
+    }
+    if (evt.target.classList.contains("popup__close")) {
+      closePopup(popup);
+    }
+  });
+});
+
 //попап редактированя профиля
 
 profileEditButton.addEventListener("click", function (evt) {
@@ -63,9 +77,9 @@ function addNewCard(evt) {
   evt.preventDefault();
 
   const newCardObject = {
-      name: popupInputTypeCardName.value,
-      link: popupInputTypeUrl.value,
-    };
+    name: popupInputTypeCardName.value,
+    link: popupInputTypeUrl.value,
+  };
 
   placesList.prepend(
     addCard(newCardObject, deleteCard, openCardImage, likeCard)
