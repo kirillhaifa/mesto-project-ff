@@ -57,3 +57,4 @@ export function likeCard(cardLikeButton) {
   cardLikeButton.classList.toggle("card__like-button_is-active");
 }
 
+console.log()

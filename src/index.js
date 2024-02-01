@@ -2,6 +2,9 @@ import { initialCards } from "./scripts/cards";
 import "./pages/index.css";
 import { addCard, deleteCard, openCardImage, likeCard } from "./scripts/card";
 import { openPopup, closePopup } from "./scripts/modal";
+import {
+  enableValidation
+} from "./scripts/validation";
 
 //константы
 
@@ -23,6 +26,7 @@ const popupInputTypeUrl = popupTypeNewCard.querySelector(
   ".popup__input_type_url"
 );
 const popups = document.querySelectorAll(".popup");
+
 
 // создание карточек из массива и их удаление
 
@@ -66,7 +70,7 @@ function handleEditProfileForm(evt) {
   profileTitle.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
 
-  closePopup(popupTypeEdit)
+  closePopup(popupTypeEdit);
 }
 
 typeEditForm.addEventListener("submit", handleEditProfileForm);
@@ -85,8 +89,18 @@ function addNewCard(evt) {
     addCard(newCardObject, deleteCard, openCardImage, likeCard)
   );
 
-  closePopup(popupTypeNewCard)
+  closePopup(popupTypeNewCard);
   newPlaceForm.reset();
 }
 
 newPlaceForm.addEventListener("submit", addNewCard);
+
+enableValidation({
+  formSelector: '.popup__form', //validationSettings.formSelector
+  inputSelector: '.popup__input', //validationSettings.inputSelector
+  submitButtonSelector: '.popup__button', //validationSettings.submitButtonSelector
+  inactiveButtonClass: 'popup__button_disabled', //validationSettings.inactiveButtonClass
+  inputErrorClass: 'form__input_type_error', //validationSettings.inputErrorClass
+  errorClass: 'popup__error_visible', //validationSettings.errorClass 
+  inputTypeUrl: "popup__input_type_url"
+});

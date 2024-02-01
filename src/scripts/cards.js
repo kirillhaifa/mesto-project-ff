@@ -13,7 +13,7 @@ export const initialCards = [
     },
     {
       name: "Нетания",
-      link: "https://israeliblog.ru/wp-content/uploads/2017/10/netanya-1.jpg",
+      link: "https://travelluxtour.ru/images/sampledata/resorts/netaniya/2.jpg",
     },
     {
       name: "Клифы Мохер",
