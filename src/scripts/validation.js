@@ -1,16 +1,14 @@
 const regexforInput = /^[a-zA-Zа-яёА-ЯЁ\s\-]+$/;
 
+//вывод ошибки при невалидности инпута
+
 export function showInputError(input, validationSettings) {
   const errorMessage = input.nextElementSibling;
   errorMessage.textContent = input.validationMessage;
   input.classList.add(validationSettings.inputErrorClass);
 }
 
-export function deactivateSubmitButton(input, validationSettings) {
-  const form = input.closest(validationSettings.formSelector);
-  const submitButton = form.querySelector(validationSettings.submitButtonSelector);
-  submitButton.classList.add(validationSettings.inactiveButtonClass);
-}
+//удаление ошибки инпута
 
 export function removeInputError(input, validationSettings) {
   const errorMessage = input.nextElementSibling;
@@ -18,48 +16,93 @@ export function removeInputError(input, validationSettings) {
   input.classList.remove(validationSettings.inputErrorClass);
 }
 
-export function activateSubmitButton(input, validationSettings) {
-  const form = input.closest(validationSettings.formSelector);
-  const inputs = form.querySelectorAll(validationSettings.inputSelector);
-  const submitButton = form.querySelector(validationSettings.submitButtonSelector);
+//отключение кнопки сабмит
 
-  const allInputsValid = Array.from(inputs).every(function (input) {
-    return input.validity.valid;
-  });
+export function deactivateSubmitButton(form, validationSettings) {
+  const submitButton = form.querySelector(
+    validationSettings.submitButtonSelector
+  );
+  if (submitButton) {
+    submitButton.classList.add(validationSettings.inactiveButtonClass);
+  }
+}
 
-  if (allInputsValid) {
+//включение кнопки сабмит
+
+export function activateSubmitButton(form, validationSettings) {
+  const submitButton = form.querySelector(
+    validationSettings.submitButtonSelector
+  );
+
+  if (submitButton) {
     submitButton.classList.remove(validationSettings.inactiveButtonClass);
   }
 }
 
-export function isValid(input, validationSettings) {
+//проверка валидности инпута
+
+export function inputIsValid(input, validationSettings) {
   if (!input.validity.valid) {
     showInputError(input, validationSettings);
-    deactivateSubmitButton(input, validationSettings);
   } else if (
     !input.value.match(regexforInput) &&
-    !input.classList.contains(validationSettings.inputTypeUrl)
+    (input.classList.contains("popup__input_type_name") ||
+      input.classList.contains("popup__input_type_card-name"))
   ) {
     showInputError(input, validationSettings);
     const errorMessage = input.nextElementSibling;
-    errorMessage.textContent =
-      "Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы";
-    deactivateSubmitButton(input, validationSettings);
+    errorMessage.textContent = input.dataset.errorMessage
   } else {
     removeInputError(input, validationSettings);
-    activateSubmitButton(input, validationSettings);
+    return true;
   }
 }
 
-export function enableValidation (validationSettings) {
-  const popupInputs = Array.from(document.querySelectorAll(validationSettings.inputSelector))
+//проверка валидности всех инпутов формы для включения кнопки сабмит
 
-  popupInputs.forEach(function (input) {
-    input.addEventListener("input", function () {
-      isValid(input, validationSettings);
-    });
+export function formIsValid(form, validationSettings) {
+  const inputs = Array.from(
+    form.querySelectorAll(validationSettings.inputSelector)
+  );
+  const allInputsValid = inputs.every(function (input) {
+    return inputIsValid(input, validationSettings);
+  });
+
+  if (allInputsValid) {
+    activateSubmitButton(form, validationSettings);
+  } else {
+    deactivateSubmitButton(form, validationSettings);
+  }
+}
+
+//очистка ошибок формы редактирования профиля
+
+export function clearValidation(form, validationSettings) {
+  form.reset()
+  const inputs = Array.from(
+    form.querySelectorAll(validationSettings.inputSelector)
+  );
+  inputs.forEach(function (input) {
+    removeInputError(input, validationSettings);
+    activateSubmitButton(form, validationSettings);
   });
 }
 
+//включение валидации
 
-
+export function enableValidation(validationSettings) {
+  const forms = Array.from(
+    document.querySelectorAll(validationSettings.formSelector)
+  );
+  forms.forEach(function (form) {
+    const inputs = Array.from(
+      form.querySelectorAll(validationSettings.inputSelector)
+    );
+    inputs.forEach(function (input) {
+      input.addEventListener("input", function () {
+        inputIsValid(input, validationSettings);
+        formIsValid(form, validationSettings);
+      });
+    });
+  });
+}

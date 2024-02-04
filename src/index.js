@@ -27,6 +27,19 @@ const popupInputTypeUrl = popupTypeNewCard.querySelector(
 );
 const popups = document.querySelectorAll(".popup");
 
+// validationSettings вынесен в константы, а не дан объектом 
+// функции enableValidation, чтобы его можно было использовать 
+// в других местах
+
+export const validationSettings = {
+  formSelector: '.popup__form', //validationSettings.formSelector
+  inputSelector: '.popup__input', //validationSettings.inputSelector
+  submitButtonSelector: '.popup__button', //validationSettings.submitButtonSelector
+  inactiveButtonClass: 'popup__button_disabled', //validationSettings.inactiveButtonClass
+  inputErrorClass: 'form__input_type_error', //validationSettings.inputErrorClass
+  errorClass: 'popup__error_visible' //validationSettings.errorClass 
+}
+
 
 // создание карточек из массива и их удаление
 
@@ -90,17 +103,8 @@ function addNewCard(evt) {
   );
 
   closePopup(popupTypeNewCard);
-  newPlaceForm.reset();
 }
 
 newPlaceForm.addEventListener("submit", addNewCard);
 
-enableValidation({
-  formSelector: '.popup__form', //validationSettings.formSelector
-  inputSelector: '.popup__input', //validationSettings.inputSelector
-  submitButtonSelector: '.popup__button', //validationSettings.submitButtonSelector
-  inactiveButtonClass: 'popup__button_disabled', //validationSettings.inactiveButtonClass
-  inputErrorClass: 'form__input_type_error', //validationSettings.inputErrorClass
-  errorClass: 'popup__error_visible', //validationSettings.errorClass 
-  inputTypeUrl: "popup__input_type_url"
-});
+enableValidation(validationSettings);

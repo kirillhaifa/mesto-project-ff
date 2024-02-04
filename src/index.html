@@ -48,6 +48,7 @@
                 type="text"
                 name="name"
                 id="name-input"
+                data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
                 class="popup__input popup__input_type_name"
                 placeholder="Имя"
                 minlength="2"
@@ -86,6 +87,7 @@
                 name="place-name"
                 id="place-name-input"
                 class="popup__input popup__input_type_card-name"
+                data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
                 placeholder="Название"
                 minlength="2"
                 maxlength="30"
@@ -131,3 +133,7 @@
     </template>
   </body>
 </html>
+
+
+<input type="text" class="popup__input popup__input_type_name" >
+<input type="text" class="popup__input popup__input_type_card-name" data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы">

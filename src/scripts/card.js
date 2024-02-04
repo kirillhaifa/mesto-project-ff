@@ -27,7 +27,6 @@ export function addCard(item, handleDeleteCard, handleOpenCardImage, handleLikeC
   }
 
   cardImage.addEventListener("click", handleOpenCardImage); 
-  //если правильно понимаю, стрелочная функция для этого не обязательна?
 
   //лайк в карточке
   function handleLikeCard() {
@@ -56,5 +55,3 @@ export function openCardImage(cardName, cardLink) {
 export function likeCard(cardLikeButton) {
   cardLikeButton.classList.toggle("card__like-button_is-active");
 }
-
-console.log()
