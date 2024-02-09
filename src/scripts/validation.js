@@ -2,7 +2,7 @@ const regexforInput = /^[a-zA-Zа-яёА-ЯЁ\s\-]+$/;
 
 //вывод ошибки при невалидности инпута
 
-export function showInputError(input, validationSettings) {
+function showInputError(input, validationSettings) {
   const errorMessage = input.nextElementSibling;
   errorMessage.textContent = input.validationMessage;
   input.classList.add(validationSettings.inputErrorClass);
@@ -10,7 +10,7 @@ export function showInputError(input, validationSettings) {
 
 //удаление ошибки инпута
 
-export function removeInputError(input, validationSettings) {
+function removeInputError(input, validationSettings) {
   const errorMessage = input.nextElementSibling;
   errorMessage.textContent = "";
   input.classList.remove(validationSettings.inputErrorClass);
@@ -18,30 +18,32 @@ export function removeInputError(input, validationSettings) {
 
 //отключение кнопки сабмит
 
-export function deactivateSubmitButton(form, validationSettings) {
+function deactivateSubmitButton(form, validationSettings) {
   const submitButton = form.querySelector(
     validationSettings.submitButtonSelector
   );
   if (submitButton) {
     submitButton.classList.add(validationSettings.inactiveButtonClass);
+    submitButton.disabled = true;
   }
 }
 
 //включение кнопки сабмит
 
-export function activateSubmitButton(form, validationSettings) {
+function activateSubmitButton(form, validationSettings) {
   const submitButton = form.querySelector(
     validationSettings.submitButtonSelector
   );
 
   if (submitButton) {
     submitButton.classList.remove(validationSettings.inactiveButtonClass);
+    submitButton.disabled = false;
   }
 }
 
 //проверка валидности инпута
 
-export function inputIsValid(input, validationSettings) {
+function inputIsValid(input, validationSettings) {
   if (!input.validity.valid) {
     showInputError(input, validationSettings);
   } else if (
@@ -60,7 +62,7 @@ export function inputIsValid(input, validationSettings) {
 
 //проверка валидности всех инпутов формы для включения кнопки сабмит
 
-export function formIsValid(form, validationSettings) {
+function formIsValid(form, validationSettings) {
   const inputs = Array.from(
     form.querySelectorAll(validationSettings.inputSelector)
   );

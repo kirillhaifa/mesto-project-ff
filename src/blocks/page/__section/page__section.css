@@ -8,6 +8,34 @@
   margin: 0 auto;
 }
 
+.profile__image {
+  border: none;
+  cursor: pointer;
+}
+
+.profile__image-container {
+  position: relative;
+}
+
+.profile__image-container:hover .profile__image {
+  opacity: 0.3;
+}
+
+.profile__image-container:hover .profile__image-edit-pen {
+  position: absolute;
+  left: 40%;
+  top: 50%;
+  transform: scale(0.75) translate(-50%, -50%); 
+  background-image: url(../../../images/edit-profile-pen.svg);
+  background-size: 30px;
+  background-position: center;
+  width: 30px; 
+  height: 30px; 
+  cursor: pointer;
+
+}
+
+
 @media screen and (max-width: 1140px) {
   .page__section {
     width: calc(100% - 40px);

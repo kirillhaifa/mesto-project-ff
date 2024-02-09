@@ -2,13 +2,18 @@ import { initialCards } from "./scripts/cards";
 import "./pages/index.css";
 import { addCard, deleteCard, openCardImage, likeCard } from "./scripts/card";
 import { openPopup, closePopup } from "./scripts/modal";
+import { enableValidation } from "./scripts/validation";
+import { data } from "autoprefixer";
 import {
-  enableValidation
-} from "./scripts/validation";
-
+  userPromise,
+  postCard,
+  patchAvatar,
+  patchProfileInfo,
+  getCardsFromServer,
+} from "./scripts/api";
 //константы
 
-const placesList = document.querySelector(".places__list");
+export const placesList = document.querySelector(".places__list");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const profileAddButton = document.querySelector(".profile__add-button");
@@ -16,8 +21,10 @@ const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const typeEditForm = popupTypeEdit.querySelector(".popup__form");
 const nameInput = document.querySelector(".popup__input_type_name");
 const jobInput = document.querySelector(".popup__input_type_description");
-const profileTitle = document.querySelector(".profile__title");
-const profileDescription = document.querySelector(".profile__description");
+export const profileTitle = document.querySelector(".profile__title");
+export const profileDescription = document.querySelector(
+  ".profile__description"
+);
 const newPlaceForm = document.forms["new-place"];
 const popupInputTypeCardName = popupTypeNewCard.querySelector(
   ".popup__input_type_card-name"
@@ -26,26 +33,49 @@ const popupInputTypeUrl = popupTypeNewCard.querySelector(
   ".popup__input_type_url"
 );
 const popups = document.querySelectorAll(".popup");
-
-// validationSettings вынесен в константы, а не дан объектом 
-// функции enableValidation, чтобы его можно было использовать 
-// в других местах
+export const profileImage = document.querySelector(".profile__image");
+const popupEditAvatar = document.querySelector(".popup_type_edit-avatar");
+const editAvatarForm = popupEditAvatar.querySelector(".popup__form");
+const editAvatarInput = popupEditAvatar.querySelector(
+  ".popup__input_edit_avatar"
+);
+const profileImageButton = document.querySelector(".profile__image-container");
 
 export const validationSettings = {
-  formSelector: '.popup__form', //validationSettings.formSelector
-  inputSelector: '.popup__input', //validationSettings.inputSelector
-  submitButtonSelector: '.popup__button', //validationSettings.submitButtonSelector
-  inactiveButtonClass: 'popup__button_disabled', //validationSettings.inactiveButtonClass
-  inputErrorClass: 'form__input_type_error', //validationSettings.inputErrorClass
-  errorClass: 'popup__error_visible' //validationSettings.errorClass 
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "form__input_type_error",
+  errorClass: "popup__error_visible",
+};
+
+//отрисовка имени и профессии при загрузке страницы
+function renderUserData() {
+  userPromise()
+    .then((data) => {
+      (profileTitle.textContent = data.name),
+        (profileDescription.textContent = data.about),
+        (profileImage.style.backgroundImage = `url('${data.avatar}')`);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос данных о пользователе не выполнен: ", err);
+    });
 }
 
+renderUserData();
 
-// создание карточек из массива и их удаление
+//загрузка карточек при загрузке страницы
+function renderCards() {
+  getCardsFromServer().then((data) => {
+    const cards = Array.from(data);
+    cards.forEach(function (card) {
+      placesList.append(addCard(card, deleteCard, openCardImage, likeCard));
+    });
+  });
+}
 
-initialCards.forEach(function (initialCard) {
-  placesList.append(addCard(initialCard, deleteCard, openCardImage, likeCard));
-});
+renderCards();
 
 //попапы
 //слушатели закрытия модальных окон при клике по крестику и заднему плану
@@ -83,6 +113,7 @@ function handleEditProfileForm(evt) {
   profileTitle.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
 
+  patchProfileInfo(nameInput.value, jobInput.value);
   closePopup(popupTypeEdit);
 }
 
@@ -98,13 +129,38 @@ function addNewCard(evt) {
     link: popupInputTypeUrl.value,
   };
 
-  placesList.prepend(
-    addCard(newCardObject, deleteCard, openCardImage, likeCard)
-  );
-
+  postCard(newCardObject).then((data) => {
+    placesList.prepend(addCard(data, deleteCard, openCardImage, likeCard));
+  });
+  
   closePopup(popupTypeNewCard);
 }
 
 newPlaceForm.addEventListener("submit", addNewCard);
 
+//включение валидации
 enableValidation(validationSettings);
+
+//popup редактирования аватарки
+profileImageButton.addEventListener("click", function () {
+  openPopup(popupEditAvatar);
+});
+
+//смена аватарки
+function editAvatar(evt) {
+  evt.preventDefault();
+
+  const inputValue = editAvatarInput.value;
+  patchAvatar(inputValue)
+    .then((data) => {
+      const avatarLink = data.avatar;
+      console.log(avatarLink);
+      profileImage.style.backgroundImage = `url('${avatarLink}')`;
+    })
+    .catch((error) => {
+      console.error("Ошибка при обновлении данных:", error);
+    });
+  closePopup(popupEditAvatar);
+}
+
+editAvatarForm.addEventListener("submit", editAvatar);
