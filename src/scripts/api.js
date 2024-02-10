@@ -1,12 +1,10 @@
-import { data } from "autoprefixer";
-import {
-  placesList,
-  profileTitle,
-  profileDescription,
-  profileImage,
-} from "../index";
-import { addCard, deleteCard, openCardImage, likeCard } from "./card";
-import { closePopup } from "./modal";
+const checkResponse = ((res) => {
+  if (res.ok) {
+    return res.json();
+  } else {
+    return Promise.reject(`Ошибка: ${res.status}`);
+  }
+})
 
 export const config = {
   baseUrl: "https://nomoreparties.co/v1/wff-cohort-5", //${config.baseUrl}
@@ -17,31 +15,15 @@ export const config = {
 };
 
 //отправка данных профиля
-export const patchProfileInfo = (name, job) => {
-  const openedPopup = document.querySelector(".popup_is-opened");
-  const addButton = openedPopup.querySelector(".button");
-  addButton.textContent = "Сохранение...";
-
-  fetch(`${config.baseUrl}/users/me`, {
+export const patchProfileInfo = (name, job, addButton) => {
+  return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
       name: `${name}`,
       about: `${job}`,
     }),
-  })
-    .then((res) => {
-      addButton.textContent = "Сохранить";
-      if (res.ok) {
-        res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .catch((err) => {
-      addButton.textContent = "Сохранить";
-      console.log("Произошла ошибка при выполнении запросов: ", err);
-    });
+  }).then(checkResponse);
 };
 
 // Запрос данных о пользователе
@@ -49,21 +31,7 @@ export function userPromise() {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "GET",
     headers: config.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .then((data) => {
-      return data;
-    })
-    .catch((err) => {
-      console.error("Ошибка. Запрос данных о пользователе не выполнен: ", err);
-      return null;
-    });
+  }).then(checkResponse);
 }
 
 // Запрос карточек
@@ -71,27 +39,10 @@ export const getCardsFromServer = () =>
   fetch(`${config.baseUrl}/cards`, {
     method: "GET",
     headers: config.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .then((data) => {
-      return data;
-    })
-    .catch((err) => {
-      console.log("Ошибка. Запрос карточек не выполнен: ", err);
-    });
+  }).then(checkResponse);
 
 //добавление новой карточки на сервер
-export function postCard(newCardObject) {
-  const openedPopup = document.querySelector(".popup_is-opened");
-  const addButton = openedPopup.querySelector(".button");
-  addButton.textContent = "Сохранение...";
-
+export const postCard = (newCardObject) => {
   return fetch(`${config.baseUrl}/cards`, {
     method: "POST",
     headers: config.headers,
@@ -99,107 +50,34 @@ export function postCard(newCardObject) {
       name: newCardObject.name,
       link: newCardObject.link,
     }),
-  })
-    .then((res) => {
-      if (res.ok) {
-        addButton.textContent = "Сохранить";
-        return res.json();
-      }
-      else {
-        addButton.textContent = "Сохранить";
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .catch((err) => {
-      console.log("Ошибка. Фото не отправлено: ", err);
-      addButton.textContent = "Сохранить";
-    });
-}
+  }).then(checkResponse);
+};
 
 export function deletePostFromServer(item) {
-  const openedPopup = document.querySelector(".popup_is-opened");
-  const addButton = openedPopup.querySelector(".button");
-  addButton.textContent = "Удаление...";
-
-  fetch(`${config.baseUrl}/cards/${item._id}`, {
+  return fetch(`${config.baseUrl}/cards/${item._id}`, {
     method: "DELETE",
     headers: config.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        addButton.textContent = "Да";
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .catch((error) => {
-      console.error("Произошла ошибка при выполнении запроса DELETE", error);
-      addButton.textContent = "Да";
-    });
+  }).then(checkResponse);
 }
 
 export const putLikeOnServer = (cardElement, item) => {
   return fetch(`${config.baseUrl}/cards/likes/${item._id}`, {
     method: "PUT",
     headers: config.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .catch((error) => {
-      console.error("Произошла ошибка при выполнении запроса PUT", error);
-    });
-}
-//stop
+  }).then(checkResponse);
+};
+
 export const deleteLikeFromServer = (cardElement, item) => {
   return fetch(`${config.baseUrl}/cards/likes/${item._id}`, {
     method: "DELETE",
     headers: config.headers,
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .catch((error) => {
-      console.error("Произошла ошибка при выполнении запроса DELETE", error);
-    });
-}
+  }).then(checkResponse);
+};
 
-export function patchAvatar(inputValue) {
-  const openedPopup = document.querySelector(".popup_is-opened");
-  const addButton = openedPopup.querySelector(".button");
-  addButton.textContent = "Сохранение...";
-
-  const avatarData = {
-    avatar: inputValue,
-  };
-
+export function patchAvatar(avatarData) {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify(avatarData),
-  })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
-    })
-    .then((data) => {
-      addButton.textContent = "Сохранить";
-      console.log(data);
-      return data;
-    })
-    .catch((error) => {
-      console.error("Произошла ошибка при выполнении запроса PATCH", error);
-      addButton.textContent = "Сохранить";
-    });
+  }).then(checkResponse);
 }

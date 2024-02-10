@@ -2,7 +2,7 @@ import { initialCards } from "./scripts/cards";
 import "./pages/index.css";
 import { addCard, deleteCard, openCardImage, likeCard } from "./scripts/card";
 import { openPopup, closePopup } from "./scripts/modal";
-import { enableValidation } from "./scripts/validation";
+import { enableValidation, deactivateSubmitButton } from "./scripts/validation";
 import { data } from "autoprefixer";
 import {
   userPromise,
@@ -11,8 +11,8 @@ import {
   patchProfileInfo,
   getCardsFromServer,
 } from "./scripts/api";
-//константы
 
+//константы
 export const placesList = document.querySelector(".places__list");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
@@ -54,6 +54,9 @@ export const validationSettings = {
 function renderUserData() {
   userPromise()
     .then((data) => {
+      return data;
+    })
+    .then((data) => {
       (profileTitle.textContent = data.name),
         (profileDescription.textContent = data.about),
         (profileImage.style.backgroundImage = `url('${data.avatar}')`);
@@ -67,12 +70,19 @@ renderUserData();
 
 //загрузка карточек при загрузке страницы
 function renderCards() {
-  getCardsFromServer().then((data) => {
-    const cards = Array.from(data);
-    cards.forEach(function (card) {
-      placesList.append(addCard(card, deleteCard, openCardImage, likeCard));
+  getCardsFromServer()
+    .then((data) => {
+      return data;
+    })
+    .then((data) => {
+      const cards = Array.from(data);
+      cards.forEach(function (card) {
+        placesList.append(addCard(card, deleteCard, openCardImage, likeCard));
+      });
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос карточек не выполнен: ", err);
     });
-  });
 }
 
 renderCards();
@@ -103,6 +113,9 @@ profileEditButton.addEventListener("click", function (evt) {
 
 profileAddButton.addEventListener("click", function (evt) {
   openPopup(popupTypeNewCard);
+  const openedPopup = document.querySelector(".popup_is-opened");
+  const popupForm = openedPopup.querySelector(".popup__form");
+  deactivateSubmitButton(popupForm, validationSettings);
 });
 
 //редактирование профиля
@@ -113,8 +126,19 @@ function handleEditProfileForm(evt) {
   profileTitle.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
 
-  patchProfileInfo(nameInput.value, jobInput.value);
-  closePopup(popupTypeEdit);
+  const openedPopup = document.querySelector(".popup_is-opened");
+  const addButton = openedPopup.querySelector(".button");
+
+  if (addButton) {
+    addButton.textContent = "Сохранение...";
+  }
+
+  patchProfileInfo(nameInput.value, jobInput.value, addButton)
+    .then(closePopup(popupTypeEdit))
+    .catch((err) => {
+      console.log("Произошла ошибка при выполнении запросов: ", err);
+    })
+    .finally((addButton.textContent = "Сохранить"));
 }
 
 typeEditForm.addEventListener("submit", handleEditProfileForm);
@@ -129,11 +153,21 @@ function addNewCard(evt) {
     link: popupInputTypeUrl.value,
   };
 
-  postCard(newCardObject).then((data) => {
-    placesList.prepend(addCard(data, deleteCard, openCardImage, likeCard));
-  });
-  
-  closePopup(popupTypeNewCard);
+  const openedPopup = document.querySelector(".popup_is-opened");
+  const addButton = openedPopup.querySelector(".button");
+  if (addButton) {
+    addButton.textContent = "Сохранение...";
+  }
+
+  postCard(newCardObject)
+    .then((data) => {
+      placesList.prepend(addCard(data, deleteCard, openCardImage, likeCard));
+      closePopup(popupTypeNewCard);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Фото не отправлено: ", err);
+    })
+    .finally((addButton.textContent = "Сохранить"));
 }
 
 newPlaceForm.addEventListener("submit", addNewCard);
@@ -144,22 +178,41 @@ enableValidation(validationSettings);
 //popup редактирования аватарки
 profileImageButton.addEventListener("click", function () {
   openPopup(popupEditAvatar);
+
+  const openedPopup = document.querySelector(".popup_is-opened");
+  const addButton = openedPopup.querySelector(".button");
+  if (addButton) {
+    addButton.textContent = "Сохранить";
+  }
 });
 
 //смена аватарки
 function editAvatar(evt) {
   evt.preventDefault();
 
-  const inputValue = editAvatarInput.value;
-  patchAvatar(inputValue)
-    .then((data) => {
-      const avatarLink = data.avatar;
-      console.log(avatarLink);
-      profileImage.style.backgroundImage = `url('${avatarLink}')`;
-    })
-    .catch((error) => {
-      console.error("Ошибка при обновлении данных:", error);
-    });
+  if (editAvatarInput.value !== "") {
+    //кнопка сохранить остается активной
+
+    const openedPopup = document.querySelector(".popup_is-opened");
+    const addButton = openedPopup.querySelector(".button");
+    if (addButton) {
+      addButton.textContent = "Сохранение...";
+    }
+
+    const avatarData = {
+      avatar: editAvatarInput.value,
+    };
+
+    patchAvatar(avatarData)
+      .then((data) => {
+        const avatarLink = data.avatar;
+        profileImage.style.backgroundImage = `url('${avatarLink}')`;
+        closePopup(popupEditAvatar);
+      })
+      .catch((error) => {
+        console.error("Ошибка при обновлении данных:", error);
+      });
+  }
   closePopup(popupEditAvatar);
 }
 

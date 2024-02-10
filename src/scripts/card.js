@@ -1,11 +1,11 @@
-import { closePopup, openPopup } from "./modal";
-import { postCard } from "./api";
+import { openPopup } from "./modal";
 import {
   deletePostFromServer,
   putLikeOnServer,
   deleteLikeFromServer,
   userPromise,
   config,
+  postCard,
 } from "./api";
 
 const cardTemplate = document.querySelector("#card-template").content;
@@ -55,18 +55,14 @@ export function addCard(
   }
 
   //удаление карточки
-  cardDeleteButton.addEventListener("click", function () {
-    openPopup(popupConfirmDelete);
-    const confrimDeleteButton = popupConfirmDelete.querySelector(
-      ".confirm-delete-button"
-    );
-    confrimDeleteButton.addEventListener("click", function deleteAndClose() {
-      handleDeleteCard(cardElement);
-      deletePostFromServer(item);
-      closePopup(popupConfirmDelete);
-      //удаление слушателя при удалении карточки
-      confrimDeleteButton.removeEventListener("click", deleteAndClose);
-    });
+  cardDeleteButton.addEventListener("click", function deletePostAndListener() {
+    handleDeleteCard(cardElement);
+    deletePostFromServer(item)
+      .then(handleDeleteCard(cardElement))
+      .catch((error) => {
+        console.error("Произошла ошибка при выполнении запроса DELETE", error);
+      });
+    cardDeleteButton.removeEventListener("click", deletePostAndListener);
   });
 
   //открытие попапа картинки
@@ -78,17 +74,35 @@ export function addCard(
 
   //лайк в карточке
   function handleLikeCard() {
-    likeCard(cardLikeButton, item);
-    if (cardLikeButton.classList.contains("card__like-button_is-active")) {
-      putLikeOnServer(cardElement, item).then((data) => {
-        const cardLikesNumber = cardElement.querySelector(".card__like-number");
-        cardLikesNumber.textContent = data.likes.length;
-      });
+    //предотвращение накопления слушателей
+    cardLikeButton.removeEventListener("click", handleLikeCard);
+    if (!cardLikeButton.classList.contains("card__like-button_is-active")) {
+      putLikeOnServer(cardElement, item)
+        .then((data) => {
+          const cardLikesNumber =
+            cardElement.querySelector(".card__like-number");
+          cardLikesNumber.textContent = data.likes.length;
+          cardLikeButton.addEventListener("click", handleLikeCard);
+          likeCard(cardLikeButton);
+        })
+        .catch((error) => {
+          console.error("Произошла ошибка при выполнении запроса PUT", error);
+        });
     } else {
-      deleteLikeFromServer(cardElement, item).then((data) => {
-        const cardLikesNumber = cardElement.querySelector(".card__like-number");
-        cardLikesNumber.textContent = data.likes.length;
-      });
+      deleteLikeFromServer(cardElement, item)
+        .then((data) => {
+          const cardLikesNumber =
+            cardElement.querySelector(".card__like-number");
+          cardLikesNumber.textContent = data.likes.length;
+          cardLikeButton.addEventListener("click", handleLikeCard);
+          likeCard(cardLikeButton);
+        })
+        .catch((error) => {
+          console.error(
+            "Произошла ошибка при выполнении запроса DELETE",
+            error
+          );
+        });
     }
   }
 
@@ -111,6 +125,6 @@ export function openCardImage(cardName, cardLink) {
 }
 
 // лайк в карточке
-export function likeCard(cardLikeButton, cardElement, item) {
+export function likeCard(cardLikeButton) {
   cardLikeButton.classList.toggle("card__like-button_is-active");
 }

@@ -18,7 +18,7 @@ function removeInputError(input, validationSettings) {
 
 //отключение кнопки сабмит
 
-function deactivateSubmitButton(form, validationSettings) {
+export function deactivateSubmitButton(form, validationSettings) {
   const submitButton = form.querySelector(
     validationSettings.submitButtonSelector
   );
