@@ -18,6 +18,7 @@ import {
 export const placesList = document.querySelector(".places__list");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
+const popupTypeEditForm = popupTypeEdit.querySelector(".popup__form");
 const profileAddButton = document.querySelector(".profile__add-button");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const popupTypeNewCardForm = popupTypeNewCard.querySelector(".popup__form");
@@ -97,6 +98,7 @@ popups.forEach((popup) => {
 
 profileEditButton.addEventListener("click", function (evt) {
   openPopup(popupTypeEdit);
+  clearValidation(popupTypeEditForm, validationSettings);
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
 });
@@ -149,12 +151,12 @@ function addNewCard(evt) {
         addCard(data, deleteCard, openCardImage, likeCard, userId)
       );
       closePopup(popupTypeNewCard);
-      clearValidation(popupTypeNewCardForm, validationSettings);
+      popupTypeNewCardForm.reset()
     })
     .catch((err) => {
       console.log("Ошибка. Фото не отправлено: ", err);
     })
-    .finally(() => submitButton.textContent = "Сохранить");
+    .finally(() => (submitButton.textContent = "Сохранить"));
 }
 
 newPlaceForm.addEventListener("submit", addNewCard);
@@ -165,7 +167,7 @@ enableValidation(validationSettings);
 //popup редактирования аватарки
 profileImageButton.addEventListener("click", function () {
   openPopup(popupEditAvatar);
-  editAvatarSubmitButton.textContent = "Сохранить";
+  deactivateSubmitButton(editAvatarForm, validationSettings)
 });
 
 //смена аватарки
@@ -186,12 +188,14 @@ function editAvatar(evt) {
         const avatarLink = data.avatar;
         profileImage.style.backgroundImage = `url('${avatarLink}')`;
         closePopup(popupEditAvatar);
-        clearValidation(editAvatarForm, validationSettings);
+        editAvatarForm.reset();
       })
       .catch((error) => {
         console.error("Ошибка при обновлении данных:", error);
       })
-      .finally(() => submitButton.textContent = "Сохранить")
+      .finally(() => {
+        submitButton.textContent = "Сохранить";
+      });
   }
 }
 
