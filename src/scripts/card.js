@@ -12,13 +12,13 @@ const cardTemplate = document.querySelector("#card-template").content;
 const popupTypeImage = document.querySelector(".popup_type_image");
 const popupImage = document.querySelector(".popup__image");
 const popupCaption = document.querySelector(".popup__caption");
-const popupConfirmDelete = document.querySelector(".popup_confirm-delete");
 
 export function addCard(
   item,
   handleDeleteCard,
   handleOpenCardImage,
-  handleLikeCard
+  handleLikeCard,
+  userId
 ) {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardElement.querySelector(".card__image");
@@ -33,36 +33,25 @@ export function addCard(
 
   if (item.likes) {
     cardLikesNumber.textContent = item.likes.length;
-    userPromise()
-      .then((data) => {
-        item.likes.forEach((like) => {
-          if (data._id === like._id) {
-            cardLikeButton.classList.add("card__like-button_is-active");
-          }
-        });
-      })
-      .catch((error) => {
-        console.error(
-          "Произошла ошибка при получении _id пользователя:",
-          error
-        );
-      });
+    item.likes.forEach((like) => {
+      if (userId === like._id) {
+        cardLikeButton.classList.add("card__like-button_is-active");
+      }
+    });
   }
 
   //фильтр своих карточек для функции удаления
-  if (item.owner && item.owner._id !== "ffa88994e7b5c2966757f3da") {
+  if (item.owner && (item.owner._id !== userId)) {
     cardDeleteButton.classList.add("card__delete-button-hidden");
   }
 
   //удаление карточки
   cardDeleteButton.addEventListener("click", function deletePostAndListener() {
-    handleDeleteCard(cardElement);
     deletePostFromServer(item)
-      .then(handleDeleteCard(cardElement))
+      .then(() => handleDeleteCard(cardElement))
       .catch((error) => {
         console.error("Произошла ошибка при выполнении запроса DELETE", error);
       });
-    cardDeleteButton.removeEventListener("click", deletePostAndListener);
   });
 
   //открытие попапа картинки
@@ -75,14 +64,10 @@ export function addCard(
   //лайк в карточке
   function handleLikeCard() {
     //предотвращение накопления слушателей
-    cardLikeButton.removeEventListener("click", handleLikeCard);
     if (!cardLikeButton.classList.contains("card__like-button_is-active")) {
       putLikeOnServer(cardElement, item)
         .then((data) => {
-          const cardLikesNumber =
-            cardElement.querySelector(".card__like-number");
           cardLikesNumber.textContent = data.likes.length;
-          cardLikeButton.addEventListener("click", handleLikeCard);
           likeCard(cardLikeButton);
         })
         .catch((error) => {
@@ -91,10 +76,7 @@ export function addCard(
     } else {
       deleteLikeFromServer(cardElement, item)
         .then((data) => {
-          const cardLikesNumber =
-            cardElement.querySelector(".card__like-number");
           cardLikesNumber.textContent = data.likes.length;
-          cardLikeButton.addEventListener("click", handleLikeCard);
           likeCard(cardLikeButton);
         })
         .catch((error) => {

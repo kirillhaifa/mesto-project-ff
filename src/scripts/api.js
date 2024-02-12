@@ -15,7 +15,7 @@ export const config = {
 };
 
 //отправка данных профиля
-export const patchProfileInfo = (name, job, addButton) => {
+export const patchProfileInfo = (name, job) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
@@ -60,6 +60,8 @@ export function deletePostFromServer(item) {
   }).then(checkResponse);
 }
 
+//cardElement не используеся в api, но используется в card. 
+//если удалить тут, перестает работать
 export const putLikeOnServer = (cardElement, item) => {
   return fetch(`${config.baseUrl}/cards/likes/${item._id}`, {
     method: "PUT",

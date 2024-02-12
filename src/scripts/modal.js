@@ -22,9 +22,4 @@ export function closePopup(popUp) {
 export function openPopup(popUp) {
   popUp.classList.add("popup_is-opened");
   document.addEventListener("keydown", handleEscape);
-
-  const form = popUp.querySelector(".popup__form");
-  if (form) {
-    clearValidation(form, validationSettings);
-  }
 }

@@ -1,5 +1,3 @@
-const regexforInput = /^[a-zA-Zа-яёА-ЯЁ\s\-]+$/;
-
 //вывод ошибки при невалидности инпута
 
 function showInputError(input, validationSettings) {
@@ -44,16 +42,12 @@ function activateSubmitButton(form, validationSettings) {
 //проверка валидности инпута
 
 function inputIsValid(input, validationSettings) {
-  if (!input.validity.valid) {
-    showInputError(input, validationSettings);
-  } else if (
-    !input.value.match(regexforInput) &&
-    (input.classList.contains("popup__input_type_name") ||
-      input.classList.contains("popup__input_type_card-name"))
-  ) {
+  if (input.validity.patternMismatch) {
     showInputError(input, validationSettings);
     const errorMessage = input.nextElementSibling;
-    errorMessage.textContent = input.dataset.errorMessage
+    errorMessage.textContent = input.dataset.errorMessage;
+  } else if (!input.validity.valid) {
+    showInputError(input, validationSettings);
   } else {
     removeInputError(input, validationSettings);
     return true;
@@ -80,7 +74,7 @@ function formIsValid(form, validationSettings) {
 //очистка ошибок формы редактирования профиля
 
 export function clearValidation(form, validationSettings) {
-  form.reset()
+  form.reset();
   const inputs = Array.from(
     form.querySelectorAll(validationSettings.inputSelector)
   );
