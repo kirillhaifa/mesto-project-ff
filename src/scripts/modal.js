@@ -1,6 +1,3 @@
-import { clearValidation } from "./validation";
-import { validationSettings } from "../index";
-
 //обработка нажатия esc
 
 function handleEscape(evt) {
